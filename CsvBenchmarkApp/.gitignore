@@ -1,0 +1,170 @@
+## Compiled files
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+.idea/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code workspace
+*.code-workspace
+
+# Rider
+*.sln.iml
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlh
+*.tli
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# dotCover
+.idea/
+*.dotCover
+
+# NCrunch
+*.ncrunch*
+_NCrunch_*
+.*crunch*.local.xml
+
+# MSTest
+*.testresults
+[Tt]est[Rr]esult*/
+
+# NUnit
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+# Build artifacts
+*.exe
+*.dll
+*.app
+*.appx
+*.apk
+*.dmg
+*.pkg
+*.msi
+*.msp
+*.msm
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+*.psmdcp
+*.ps1
+.nuget/
+packages/
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+
+# Dotnet tools
+.dotnet-tools.json
+
+# Azure
+*.azurePubxml
+*.azurePubxml.user
+PublishProfiles/
+*.pubxml
+*.publishproj
+.publishsettings
+*.azure
+
+# Local DB
+*.mdf
+*.ldf
+*.ndf
+
+# Logs
+*.log
+*.tlog
+*.svclog
+*.wrn
+*.err
+
+# Others
+*.dbmdl
+*.bak
+*.bkp
+*.cache
+*.config
+*.diff
+*.orig
+*.rej
+
+# Rider project files
+.idea/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# JetBrains Rider
+*.sln.iml
