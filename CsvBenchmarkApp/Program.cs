@@ -5,138 +5,163 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-
 class CsvBenchmarkApp
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("=== Benchmark de Leitura de CSV ===");
+        string[] opcoes = {
+            "Executar benchmark com método específico",
+            "Executar todas as abordagens",
+            "Sair"
+        };
 
-        Console.Write("Informe o caminho do arquivo CSV: ");
-        string? path = Console.ReadLine();
+        int indiceSelecionado = 0;
+        bool executando = true;
 
-        Console.Write("Separador de linha (padrão \\n): ");
-        string? lineSep = Console.ReadLine();
-        if (string.IsNullOrEmpty(lineSep)) lineSep = "\n";
+        while (executando)
+        {
+            Console.Clear();
+            Console.WriteLine("=== MENU DE BENCHMARK CSV ===\n");
 
-        Console.Write("Separador de coluna (padrão ,): ");
-        string? colSep = Console.ReadLine();
-        if (string.IsNullOrEmpty(colSep)) colSep = ",";
+            for (int i = 0; i < opcoes.Length; i++)
+            {
+                if (i == indiceSelecionado)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"> {opcoes[i]}");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine($"  {opcoes[i]}");
+                }
+            }
 
-        Console.WriteLine("\nEscolha a abordagem:");
-        Console.WriteLine("1 - StreamReader linha a linha");
-        Console.WriteLine("2 - ReadAllText + Split");
-        Console.WriteLine("3 - ReadLines + Parallel LINQ");
-        Console.WriteLine("4 - MemoryMappedFile");
-        Console.WriteLine("5 - Span<T> + ReadAllBytes");
-        Console.WriteLine("6 - Executar todas as abordagens");
+            var tecla = Console.ReadKey(true);
 
-        Console.Write("Opção: ");
-        string? option = Console.ReadLine();
+            switch (tecla.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    indiceSelecionado = (indiceSelecionado - 1 + opcoes.Length) % opcoes.Length;
+                    break;
+                case ConsoleKey.DownArrow:
+                    indiceSelecionado = (indiceSelecionado + 1) % opcoes.Length;
+                    break;
+                case ConsoleKey.Enter:
+                    switch (indiceSelecionado)
+                    {
+                        case 0: ExecutarMetodoEspecifico(); break;
+                        case 1: ExecutarTodosBenchmarks(); break;
+                        case 2: executando = false; break;
+                    }
+                    break;
+            }
+        }
+    }
 
-        var stopwatch = Stopwatch.StartNew();
-        long memoryBefore = GC.GetTotalMemory(true);
+    static void ExecutarMetodoEspecifico()
+    {
+        Console.Clear();
+        Console.WriteLine("=== Benchmark com Método Específico ===");
+
+        string path = Solicitar("Informe o caminho do arquivo CSV");
+        string lineSep = Solicitar("Separador de linha (padrão \\n)", "\n");
+        string colSep = Solicitar("Separador de coluna (padrão ,)", ",");
+
+        string option = MenuSelecionarMetodo();
 
         Func<DataTable> metodo = option switch
         {
-
-            "1" => () => {
-                var resultados = new List<BenchmarkResult>
-                {
-                    BenchmarkResult.ExecutarBenchmark("StreamReader", () => CsvStrategies.ReadWithStreamReader(path, colSep))
-                };
-                BenchmarkResult.ExibirTabelaResultados(resultados);
-                return resultados.OrderBy(r => r.TempoSegundos).First().Nome switch
-                {
-                    "StreamReader" => CsvStrategies.ReadWithStreamReader(path, colSep),
-                    _ => new DataTable()
-                };
-            }
-            ,
-            "2" => () =>
-                {
-                var resultados = new List<BenchmarkResult> {
-                    BenchmarkResult.ExecutarBenchmark("ReadAllText", () => CsvStrategies.ReadWithAllText(path, lineSep, colSep))
-                };
-                BenchmarkResult.ExibirTabelaResultados(resultados);
-                    return resultados.OrderBy(r => r.TempoSegundos).First().Nome switch
-                {
-                    "ReadAllText" => CsvStrategies.ReadWithAllText(path, lineSep, colSep),
-                    _ => new DataTable()
-                };
-                }
-        ,
-            "3" => () =>
-            {
-                var resultados = new List<BenchmarkResult> {
-                    BenchmarkResult.ExecutarBenchmark("Parallel LINQ", () => CsvStrategies.ReadWithParallel(path, colSep))
-                };
-                BenchmarkResult.ExibirTabelaResultados(resultados);
-                return resultados.OrderBy(r => r.TempoSegundos).First().Nome switch
-                {
-                    "Parallel LINQ" => CsvStrategies.ReadWithParallel(path, colSep),
-                    _ => new DataTable()
-                };
-            }
-            ,
-            "4" => () =>
-            {
-                var resultados = new List<BenchmarkResult> {
-                    BenchmarkResult.ExecutarBenchmark("MemoryMappedFile", () => CsvStrategies.ReadWithMemoryMapped(path, colSep))
-                };
-                BenchmarkResult.ExibirTabelaResultados(resultados);
-                return resultados.OrderBy(r => r.TempoSegundos).First().Nome switch
-                {
-                    "MemoryMappedFile" => CsvStrategies.ReadWithMemoryMapped(path, colSep),
-                    _ => new DataTable()
-                };
-            }
-        ,
-            "5" => () =>
-            {
-                var resultados = new List<BenchmarkResult> {
-                    BenchmarkResult.ExecutarBenchmark("Span<T>", () => CsvStrategies.ReadWithSpan(path, lineSep, colSep))
-                };
-                BenchmarkResult.ExibirTabelaResultados(resultados);
-                return resultados.OrderBy(r => r.TempoSegundos).First().Nome switch
-                {
-                    "Span<T>" => CsvStrategies.ReadWithSpan(path, lineSep, colSep),
-                    _ => new DataTable()
-                };
-            }
-            ,
-            "6" => () =>
-            {
-                var resultados = new List<BenchmarkResult>
-                    {
-                        BenchmarkResult.ExecutarBenchmark("StreamReader", () => CsvStrategies.ReadWithStreamReader(path, colSep)),
-                        BenchmarkResult.ExecutarBenchmark("ReadAllText", () => CsvStrategies.ReadWithAllText(path, lineSep, colSep)),
-                        BenchmarkResult.ExecutarBenchmark("Parallel LINQ", () => CsvStrategies.ReadWithParallel(path, colSep)),
-                        BenchmarkResult.ExecutarBenchmark("MemoryMappedFile", () => CsvStrategies.ReadWithMemoryMapped(path, colSep)),
-                        BenchmarkResult.ExecutarBenchmark("Span<T>", () => CsvStrategies.ReadWithSpan(path, lineSep, colSep))
-                    };
-
-                BenchmarkResult.ExibirTabelaResultados(resultados);
-
-                // Retorna o DataTable da abordagem mais rápida (opcional)
-                return resultados.OrderBy(r => r.TempoSegundos).First().Nome switch
-                {
-                    "StreamReader" => CsvStrategies.ReadWithStreamReader(path, colSep),
-                    "ReadAllText" => CsvStrategies.ReadWithAllText(path, lineSep, colSep),
-                    "Parallel LINQ" => CsvStrategies.ReadWithParallel(path, colSep),
-                    "MemoryMappedFile" => CsvStrategies.ReadWithMemoryMapped(path, colSep),
-                    "Span<T>" => CsvStrategies.ReadWithSpan(path, lineSep, colSep),
-                    _ => new DataTable()
-                };
-            }
-            ,
+            "1" => () => CsvStrategies.ReadWithStreamReader(path, colSep),
+            "2" => () => CsvStrategies.ReadWithAllText(path, lineSep, colSep),
+            "3" => () => CsvStrategies.ReadWithParallel(path, colSep),
+            "4" => () => CsvStrategies.ReadWithMemoryMapped(path, colSep),
+            "5" => () => CsvStrategies.ReadWithSpan(path, lineSep, colSep),
             _ => throw new ArgumentException("Opção inválida")
-        }; 
+        };
 
-        var x = metodo();
+        var resultados = new List<BenchmarkResult>
+        {
+            BenchmarkResult.ExecutarBenchmark($"Método {option}", metodo)
+        };
 
-        stopwatch.Stop();
-        long memoryAfter = GC.GetTotalMemory(false);
+        BenchmarkResult.ExibirTabelaResultados(resultados);
+        Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+        Console.ReadKey();
+    }
 
+    static void ExecutarTodosBenchmarks()
+    {
+        Console.Clear();
+        Console.WriteLine("=== Benchmark com Todas as Abordagens ===");
+
+        string path = Solicitar("Informe o caminho do arquivo CSV");
+        string lineSep = Solicitar("Separador de linha (padrão \\n)", "\n");
+        string colSep = Solicitar("Separador de coluna (padrão ,)", ",");
+
+        var resultados = new List<BenchmarkResult>
+        {
+            BenchmarkResult.ExecutarBenchmark("StreamReader", () => CsvStrategies.ReadWithStreamReader(path, colSep)),
+            BenchmarkResult.ExecutarBenchmark("ReadAllText", () => CsvStrategies.ReadWithAllText(path, lineSep, colSep)),
+            BenchmarkResult.ExecutarBenchmark("Parallel LINQ", () => CsvStrategies.ReadWithParallel(path, colSep)),
+            BenchmarkResult.ExecutarBenchmark("MemoryMappedFile", () => CsvStrategies.ReadWithMemoryMapped(path, colSep)),
+            BenchmarkResult.ExecutarBenchmark("Span<T>", () => CsvStrategies.ReadWithSpan(path, lineSep, colSep))
+        };
+
+        BenchmarkResult.ExibirTabelaResultados(resultados);
+        Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+        Console.ReadKey();
+    }
+
+    static string MenuSelecionarMetodo()
+    {
+        string[] metodos = {
+            "StreamReader linha a linha",
+            "ReadAllText + Split",
+            "ReadLines + Parallel LINQ",
+            "MemoryMappedFile",
+            "Span<T> + ReadAllBytes"
+        };
+
+        int indice = 0;
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("=== Selecione o Método de Leitura CSV ===\n");
+
+            for (int i = 0; i < metodos.Length; i++)
+            {
+                if (i == indice)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"> {metodos[i]}");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine($"  {metodos[i]}");
+                }
+            }
+
+            var tecla = Console.ReadKey(true);
+            switch (tecla.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    indice = (indice - 1 + metodos.Length) % metodos.Length;
+                    break;
+                case ConsoleKey.DownArrow:
+                    indice = (indice + 1) % metodos.Length;
+                    break;
+                case ConsoleKey.Enter:
+                    return (indice + 1).ToString(); // retorna "1" a "5"
+            }
+        }
+    }
+
+    static string Solicitar(string mensagem, string padrao = "")
+    {
+        Console.Write($"{mensagem}: ");
+        string? entrada = Console.ReadLine();
+        return string.IsNullOrEmpty(entrada) ? padrao : entrada;
     }
 }

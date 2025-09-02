@@ -9,4 +9,8 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ScottPlot" Version="5.0.56" />
+  </ItemGroup>
+
 </Project>
